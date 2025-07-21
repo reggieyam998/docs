@@ -1,33 +1,103 @@
 ---
-title: 'Introduction'
-description: 'Example section for showcasing API endpoints'
+title: 'API Reference'
+description: 'SportsQuant API documentation for developers'
 ---
 
-<Note>
-  If you're not looking to build API reference documentation, you can delete
-  this section by removing the api-reference folder.
-</Note>
+## Welcome to SportsQuant API
 
-## Welcome
-
-There are two ways to build API documentation: [OpenAPI](https://mintlify.com/docs/api-playground/openapi/setup) and [MDX components](https://mintlify.com/docs/api-playground/mdx/configuration). For the starter kit, we are using the following OpenAPI specification.
+The SportsQuant API allows developers to integrate prediction market functionality into their applications. Our RESTful API provides access to market data, trading operations, and real-time updates.
 
 <Card
-  title="Plant Store Endpoints"
-  icon="leaf"
-  href="https://github.com/mintlify/starter/blob/main/api-reference/openapi.json"
+  title="OpenAPI Specification"
+  icon="file-code"
+  href="/api-reference/openapi.json"
 >
-  View the OpenAPI specification file
+  View the complete OpenAPI specification
 </Card>
 
 ## Authentication
 
-All API endpoints are authenticated using Bearer tokens and picked up from the specification file.
+All API endpoints require authentication using API keys. You can generate API keys from your SportsQuant dashboard.
+
+### API Key Authentication
+
+Include your API key in the request headers:
+
+```bash
+Authorization: Bearer YOUR_API_KEY
+```
+
+### Rate Limits
+
+- **Free tier**: 1,000 requests per hour
+- **Pro tier**: 10,000 requests per hour
+- **Enterprise**: Custom limits
+
+## Base URL
+
+```
+https://api.sportsquant.com/v1
+```
+
+## Response Format
+
+All API responses follow a consistent JSON format:
 
 ```json
-"security": [
-  {
-    "bearerAuth": []
-  }
-]
+{
+  "success": true,
+  "data": {
+    // Response data
+  },
+  "error": null,
+  "timestamp": "2024-01-15T10:30:00Z"
+}
 ```
+
+## Error Handling
+
+The API uses standard HTTP status codes:
+
+- `200` - Success
+- `400` - Bad Request
+- `401` - Unauthorized
+- `403` - Forbidden
+- `404` - Not Found
+- `429` - Rate Limit Exceeded
+- `500` - Internal Server Error
+
+Error responses include details:
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "INVALID_MARKET_ID",
+    "message": "Market ID is invalid",
+    "details": {
+      "field": "market_id",
+      "value": "invalid-id"
+    }
+  },
+  "data": null
+}
+```
+
+## SDKs and Libraries
+
+We provide official SDKs for popular programming languages:
+
+<CardGroup cols={2}>
+  <Card title="JavaScript SDK" icon="js" href="/technical/sdk#javascript">
+    Node.js and browser support
+  </Card>
+  <Card title="Python SDK" icon="python" href="/technical/sdk#python">
+    Full Python integration
+  </Card>
+  <Card title="WebSocket API" icon="wifi" href="/api-reference/websocket">
+    Real-time market updates
+  </Card>
+  <Card title="Webhooks" icon="bell" href="/technical/webhooks">
+    Event notifications
+  </Card>
+</CardGroup>
