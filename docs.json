@@ -11,7 +11,7 @@
   "navigation": {
     "tabs": [
       {
-        "tab": "Guides",
+        "tab": "Knowledge Base",
         "groups": [
           {
             "group": "Getting Started",
@@ -23,59 +23,65 @@
           {
             "group": "Platform Features",
             "pages": [
-              "guides/market-creation",
-              "guides/trading",
-              "guides/liquidity",
-              "guides/settlement"
+              "knowledge-base/market-creation",
+              "knowledge-base/trading",
+              "knowledge-base/liquidity",
+              "knowledge-base/settlement"
             ]
           },
           {
             "group": "Advanced Topics",
             "pages": [
-              "guides/strategies",
-              "guides/risk-management",
-              "guides/governance"
+              "knowledge-base/strategies",
+              "knowledge-base/risk-management",
+              "knowledge-base/governance"
+            ]
+          },
+          {
+            "group": "API Reference",
+            "pages": [
+              "knowledge-base/api-introduction",
+              "knowledge-base/authentication",
+              "knowledge-base/endpoints",
+              "knowledge-base/websocket",
+              "knowledge-base/events"
+            ]
+          },
+          {
+            "group": "Technical",
+            "pages": [
+              "knowledge-base/contracts",
+              "knowledge-base/security",
+              "knowledge-base/audits",
+              "knowledge-base/sdk",
+              "knowledge-base/webhooks",
+              "knowledge-base/integration"
             ]
           }
         ]
       },
       {
-        "tab": "API Reference",
+        "tab": "Development Backlog",
         "groups": [
           {
-            "group": "Core API",
+            "group": "Current Sprint",
             "pages": [
-              "api-reference/introduction",
-              "api-reference/authentication",
-              "api-reference/endpoints"
-            ]
-          },
-          {
-            "group": "WebSocket API",
-            "pages": [
-              "api-reference/websocket",
-              "api-reference/events"
+              "development-backlog/current-sprint",
+              "development-backlog/sprint-goals",
+              "development-backlog/blockers"
             ]
           }
         ]
       },
       {
-        "tab": "Technical",
+        "tab": "Product Features & Releases",
         "groups": [
           {
-            "group": "Smart Contracts",
+            "group": "Features & Roadmap",
             "pages": [
-              "technical/contracts",
-              "technical/security",
-              "technical/audits"
-            ]
-          },
-          {
-            "group": "Development",
-            "pages": [
-              "technical/sdk",
-              "technical/webhooks",
-              "technical/integration"
+              "product/upcoming-features",
+              "product/release-notes",
+              "product/roadmap"
             ]
           }
         ]
