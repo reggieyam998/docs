@@ -57,6 +57,12 @@
               "knowledge-base/webhooks",
               "knowledge-base/integration"
             ]
+          },
+          {
+            "group": "Wallets & Security",
+            "pages": [
+              "knowledge-base/proxy-wallet"
+            ]
           }
         ]
       },
