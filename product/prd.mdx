@@ -1,0 +1,354 @@
+---
+title: "Product Requirements Document"
+description: "Comprehensive PRD for Fox Market - A Polymarket-like Decentralized Prediction Market Platform"
+---
+
+# Fox Market - Product Requirements Document
+
+## Executive Summary
+
+Fox Market is a decentralized prediction market platform that enables users to create, trade, and settle prediction markets on real-world events. Built on blockchain technology and inspired by Polymarket, Fox Market provides a transparent, trustless environment for users to express their views on future events through market-based mechanisms.
+
+### Vision Statement
+To become the leading decentralized prediction market platform that democratizes access to information markets and enables collective intelligence through transparent, blockchain-based trading.
+
+### Mission Statement
+Create a permissionless, decentralized platform where anyone can create prediction markets, trade on event outcomes, and benefit from the wisdom of crowds through secure, transparent market mechanisms.
+
+## Product Overview
+
+### Core Value Proposition
+- **Decentralized & Trustless**: Built on blockchain for transparency and censorship resistance
+- **Real-time Trading**: 24/7 market access with instant settlement
+- **Permissionless Market Creation**: Anyone can create markets on any topic
+- **Hybrid Architecture**: Combines off-chain order matching with on-chain settlement
+- **User-Friendly Interface**: Intuitive design for both beginners and advanced traders
+
+### Target Audience
+
+#### Primary Users
+- **Retail Traders**: Individuals interested in trading on event outcomes
+- **Market Creators**: Users who want to create and manage prediction markets
+- **DeFi Enthusiasts**: Blockchain users seeking new trading opportunities
+- **Information Seekers**: Users interested in accessing collective market intelligence
+
+#### Secondary Users
+- **Institutional Traders**: Professional trading firms and hedge funds
+- **Researchers**: Academics studying prediction markets and collective intelligence
+- **Content Creators**: Influencers and analysts creating market-related content
+
+## Market Requirements
+
+### Market Creation System
+
+#### Core Functionality
+- **Binary Markets**: Support for Yes/No prediction markets
+- **Market Parameters**: Question, resolution date, oracle address, and outcome tokens
+- **ERC-1155 Tokens**: Each market outcome represented by unique tokens
+- **Oracle Integration**: Support for external data providers for market resolution
+- **Market Lifecycle**: Creation, active trading, resolution, and settlement phases
+
+#### Market Creation Requirements
+- **Question Format**: Text-based questions with 256 character limit
+- **Resolution Date**: Unix timestamp for market closure
+- **Oracle Address**: Valid Ethereum address for data source
+- **Outcome Tokens**: Automatic generation of Yes/No tokens
+- **Market Validation**: Input validation for all market parameters
+- **Event Emission**: `MarketCreated` event with all market details
+
+#### Market Management
+- **Market Discovery**: Browse and search active markets
+- **Market Details**: Comprehensive view of market information
+- **Trading History**: Historical price and volume data
+- **Resolution Process**: Automated settlement based on oracle data
+
+### Market Categories
+- **Sports**: Professional and amateur sports events
+- **Politics**: Elections, policy decisions, and political events
+- **Entertainment**: Awards, releases, and entertainment industry events
+- **Economics**: Financial markets, economic indicators, and business events
+- **Technology**: Product launches, company milestones, and tech developments
+- **Weather**: Climate events and natural phenomena
+- **Custom**: User-defined categories for specialized markets
+
+## Trading System Requirements
+
+### Hybrid Decentralized Order Book (CLOB)
+
+#### Architecture Overview
+- **Off-chain Matching**: EIP-712 signed orders matched off-chain for efficiency
+- **On-chain Settlement**: Matched orders settled on-chain for security
+- **Real-time Updates**: Order book updates within 1 second
+- **Price Discovery**: Market-driven pricing with bid/ask spreads
+
+#### Order Types
+- **Limit Orders**: Buy/sell at specific price levels
+- **Market Orders**: Immediate execution at best available price
+- **Partial Fills**: Support for order splitting and partial execution
+- **Order Cancellation**: Real-time order cancellation capability
+
+#### Order Book Features
+- **Price Levels**: Display top 10 bids and asks
+- **Price Format**: 0-1 USDC range reflecting probabilities (6 decimal precision)
+- **Quantity Display**: Available liquidity at each price level
+- **Time Priority**: FIFO matching for orders at same price
+- **Depth Visualization**: Order book depth charts and analytics
+
+#### Matching Engine
+- **Price-Time Priority**: Orders matched by price, then by timestamp
+- **Automatic Matching**: Real-time order matching and execution
+- **Trade Execution**: Matched orders submitted to smart contracts
+- **Settlement Confirmation**: On-chain transaction confirmation
+- **Trade History**: Complete audit trail of all trades
+
+### Trading Interface Requirements
+
+#### Order Placement
+- **EIP-712 Signing**: MetaMask integration for order signing
+- **Order Preview**: Display transaction details before signing
+- **Price Input**: Intuitive price selection (0-1 range)
+- **Quantity Input**: Amount of shares to trade
+- **Order Confirmation**: Clear confirmation of order details
+- **Status Updates**: Real-time order status and execution updates
+
+#### Portfolio Management
+- **Position Overview**: Current holdings across all markets
+- **P&L Tracking**: Real-time profit/loss calculations
+- **Trade History**: Complete transaction history
+- **Market Performance**: Individual market performance metrics
+- **Portfolio Analytics**: Risk metrics and performance analysis
+
+## Smart Contract Infrastructure
+
+### Proxy Wallet System
+
+#### Proxy Wallet Factory
+- **Deterministic Deployment**: Predictable wallet addresses for users
+- **Gas Optimization**: Efficient wallet creation under 150,000 gas
+- **Access Control**: Owner and Fox Market admin roles
+- **Event Emission**: Wallet creation and management events
+
+#### Proxy Wallet Features
+- **USDC Management**: Deposit, withdrawal, and balance tracking
+- **Trading Approvals**: Approve market contracts for trading
+- **Multi-signature Support**: Enhanced security for large positions
+- **Transaction History**: Complete audit trail of wallet activities
+
+### Market Contract
+
+#### ERC-1155 Implementation
+- **Token Standard**: Standardized outcome token representation
+- **Batch Operations**: Efficient multi-token transfers
+- **Metadata Support**: Rich token metadata and descriptions
+- **Approval System**: Flexible token approval mechanisms
+
+#### Market Management
+- **Market Creation**: Deploy new prediction markets
+- **Token Minting**: Create outcome tokens for new markets
+- **Market Resolution**: Settle markets based on oracle data
+- **Token Redemption**: Convert outcome tokens to USDC
+
+### Trading Contract
+
+#### Order Execution
+- **EIP-712 Validation**: Verify order signatures before execution
+- **Token Transfers**: Execute ERC-1155 and USDC transfers
+- **Partial Fills**: Handle partial order execution
+- **Settlement Events**: Emit trade execution events
+
+#### Security Features
+- **Reentrancy Protection**: Prevent reentrancy attacks
+- **Signature Validation**: Cryptographic signature verification
+- **Access Control**: Proper permission management
+- **Gas Optimization**: Efficient contract execution
+
+## User Experience Requirements
+
+### Onboarding Flow
+
+#### Wallet Connection
+- **MetaMask Integration**: Primary wallet connection method
+- **WalletConnect Support**: Alternative connection options
+- **Network Detection**: Automatic Polygon network detection
+- **Connection Status**: Clear wallet connection indicators
+
+#### User Registration
+- **Proxy Wallet Creation**: Automatic wallet deployment
+- **Initial Deposit**: USDC deposit for trading
+- **Tutorial System**: Interactive platform introduction
+- **Account Setup**: User profile and preferences
+
+### Trading Interface
+
+#### Market Discovery
+- **Market Browser**: Browse active and upcoming markets
+- **Search Functionality**: Find markets by keyword or category
+- **Filtering Options**: Filter by category, date, volume, etc.
+- **Market Cards**: Attractive market preview cards
+
+#### Trading Dashboard
+- **Order Book Display**: Real-time bid/ask visualization
+- **Price Charts**: Historical price and volume charts
+- **Order Placement**: Intuitive order entry forms
+- **Position Management**: Current holdings and P&L display
+
+#### Mobile Experience
+- **Responsive Design**: Optimized for mobile devices
+- **Touch Interactions**: Mobile-friendly trading interface
+- **Push Notifications**: Market updates and trade confirmations
+- **Offline Support**: Basic functionality without internet
+
+### User Support
+
+#### Help System
+- **Documentation**: Comprehensive user guides
+- **FAQ Section**: Common questions and answers
+- **Video Tutorials**: Step-by-step platform tutorials
+- **Live Chat**: Real-time customer support
+
+#### Community Features
+- **User Profiles**: Public trading profiles and statistics
+- **Market Discussions**: Community discussions on markets
+- **Reputation System**: User reputation and trust scores
+- **Social Trading**: Follow successful traders
+
+## Technical Specifications
+
+### Architecture Overview
+
+#### Frontend Stack
+- **React**: Modern JavaScript framework
+- **TypeScript**: Type-safe development
+- **Tailwind CSS**: Utility-first styling
+- **Ethers.js**: Ethereum interaction library
+- **Web3 Integration**: Blockchain connectivity
+
+#### Backend Stack
+- **Python**: Backend development language
+- **FastAPI**: Modern web framework
+- **Redis**: Caching and session management
+- **PostgreSQL**: Primary database
+- **Web3.py**: Blockchain interaction
+
+#### Blockchain Infrastructure
+- **Polygon**: Primary blockchain network
+- **USDC**: Primary trading currency
+- **EIP-712**: Order signing standard
+- **ERC-1155**: Outcome token standard
+- **OpenZeppelin**: Security libraries
+
+### Performance Requirements
+
+#### Response Times
+- **Order Book Updates**: < 1 second
+- **Order Execution**: < 5 seconds
+- **Page Load Times**: < 3 seconds
+- **API Response**: < 500ms
+
+#### Scalability
+- **Concurrent Users**: Support 10,000+ simultaneous users
+- **Order Throughput**: Handle 100+ orders per second
+- **Market Capacity**: Support 1,000+ active markets
+- **Data Storage**: Efficient storage of trading history
+
+#### Reliability
+- **Uptime**: 99.9% platform availability
+- **Data Consistency**: ACID compliance for critical operations
+- **Error Handling**: Graceful error recovery
+- **Monitoring**: Comprehensive system monitoring
+
+### Security Requirements
+
+#### Smart Contract Security
+- **Audit Requirements**: Third-party security audits
+- **Code Review**: Comprehensive code review process
+- **Testing**: Extensive unit and integration testing
+- **Upgradeability**: Secure contract upgrade mechanisms
+
+#### Platform Security
+- **Authentication**: Secure user authentication
+- **Authorization**: Proper access control
+- **Data Protection**: User data privacy and protection
+- **DDoS Protection**: Protection against attacks
+
+#### Operational Security
+- **Key Management**: Secure private key handling
+- **Backup Systems**: Regular data backups
+- **Incident Response**: Security incident procedures
+- **Compliance**: Regulatory compliance measures
+
+## Success Metrics and KPIs
+
+### User Engagement Metrics
+- **Daily Active Users (DAU)**: Target 1,000+ DAU within 6 months
+- **Monthly Active Users (MAU)**: Target 10,000+ MAU within 12 months
+- **User Retention**: 30%+ 7-day retention rate
+- **Session Duration**: Average 15+ minutes per session
+
+### Trading Metrics
+- **Trading Volume**: $1M+ monthly trading volume within 6 months
+- **Number of Trades**: 10,000+ trades per month
+- **Average Trade Size**: $100+ average trade size
+- **Market Creation**: 100+ new markets per month
+
+### Platform Metrics
+- **Market Liquidity**: $10,000+ average market liquidity
+- **Price Accuracy**: 80%+ prediction accuracy for resolved markets
+- **Settlement Success**: 99%+ successful market settlements
+- **User Satisfaction**: 4.5+ star average rating
+
+### Business Metrics
+- **Revenue**: 2.5% trading fee revenue
+- **User Acquisition Cost**: < $50 per acquired user
+- **Lifetime Value**: $500+ user lifetime value
+- **Market Share**: 10%+ of decentralized prediction market volume
+
+## Risk Assessment
+
+### Technical Risks
+- **Smart Contract Bugs**: Potential vulnerabilities in contracts
+- **Scalability Issues**: Performance problems under load
+- **Oracle Failures**: Incorrect market resolutions
+- **Network Congestion**: High gas fees and slow transactions
+
+### Market Risks
+- **Low Liquidity**: Insufficient trading volume
+- **Market Manipulation**: Coordinated trading attacks
+- **Regulatory Changes**: New regulations affecting operations
+- **Competition**: Established players entering market
+
+### Operational Risks
+- **Key Person Risk**: Dependence on key team members
+- **Funding Risk**: Insufficient capital for development
+- **Partnership Risk**: Critical partnership failures
+- **Reputation Risk**: Negative publicity or security incidents
+
+## Implementation Timeline
+
+### Phase 1: MVP Development (Months 1-3)
+- Core smart contract deployment
+- Basic trading interface
+- Market creation functionality
+- User onboarding flow
+
+### Phase 2: Feature Enhancement (Months 4-6)
+- Advanced trading features
+- Mobile application
+- API development
+- Community features
+
+### Phase 3: Scale and Optimize (Months 7-12)
+- Performance optimization
+- Advanced analytics
+- Institutional features
+- Global expansion
+
+## Conclusion
+
+Fox Market represents a significant opportunity to create a leading decentralized prediction market platform. By combining the best features of traditional prediction markets with blockchain technology, Fox Market can provide users with a transparent, efficient, and accessible platform for trading on future events.
+
+The success of Fox Market depends on execution excellence, user experience quality, and community adoption. With proper implementation of the requirements outlined in this PRD, Fox Market can achieve its vision of becoming the leading decentralized prediction market platform.
+
+---
+
+*This PRD is a living document that will be updated as the product evolves and new requirements emerge.*
