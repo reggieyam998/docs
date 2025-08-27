@@ -51,6 +51,7 @@
             "group": "Technical",
             "pages": [
               "knowledge-base/contracts",
+              "knowledge-base/smart-contract-interactions",
               "knowledge-base/security",
               "knowledge-base/audits",
               "knowledge-base/sdk",
@@ -70,24 +71,21 @@
         "tab": "Development Backlog",
         "groups": [
           {
-            "group": "Current Sprint",
+            "group": "Project Planning",
             "pages": [
-              "development-backlog/current-sprint",
-              "development-backlog/sprint-goals",
-              "development-backlog/blockers"
+              "development-backlog/backlog",
+              "development-backlog/roadmap"
             ]
           }
         ]
       },
       {
-        "tab": "Product Features & Releases",
+        "tab": "Product",
         "groups": [
           {
-            "group": "Features & Roadmap",
+            "group": "Product Documentation",
             "pages": [
-              "product/upcoming-features",
-              "product/release-notes",
-              "product/roadmap"
+              "product/prd"
             ]
           }
         ]
