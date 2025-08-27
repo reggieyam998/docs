@@ -1,0 +1,209 @@
+---
+title: "Development Backlog"
+description: "Comprehensive backlog and blockers for Fox Market MVP development"
+---
+
+# Backlog and Blockers for Polymarket-Like Prediction Market MVP
+
+## Backlog
+
+### Epic 1: Hybrid Decentralized Order Book (CLOB)
+**Objective**: Build a hybrid decentralized Central Limit Order Book (CLOB) where users submit EIP-712 signed transactions off-chain, displaying transaction details in their wallet, the CLOB matches orders off-chain, and the server submits matched orders to smart contracts for on-chain settlement.
+
+- **User Story 1.1**: As a trader, I want to view the order book for a prediction market so I can see current bids and asks in real-time to inform my trading decisions.
+  - **Acceptance Criteria**:
+    - Display top 10 bids and asks with prices (0–1 USDC, reflecting probabilities) and quantities for a selected market in the UI.
+    - Update order book within 1 second of new EIP-712 signed orders or cancellations, ensuring real-time accuracy.
+    - Normalize prices to 6 decimal places (e.g., 0.123456 USDC) to match USDC precision.
+    - Show a "No orders available" message in the UI for empty order books.
+    - Validate signed orders: price (minimum 0.000001, maximum 1.000000), quantity (>0), side (bid/ask), valid EIP-712 signature (verified against signer's address).
+    - Cache order book in Redis for under 100ms read latency.
+  - **Tasks**:
+    - Implement `OrderBook` class with `SortedDict` from `sortedcontainers` for bids and asks.
+    - Add methods: `add_signed_order(order: Dict, signature: bytes)`, `cancel_order(order_id: str)`, `get_top_orders(n: int) -> List[Dict[str, float]]`.
+    - Verify EIP-712 signatures using `eth_account` with a defined typed data structure.
+    - Cache order book in Redis with key `market:<market_id>:orderbook` and 5-minute TTL.
+    - Create a backend endpoint (`/orderbook/<market_id>`) to serve order book data to the React UI.
+    - Integrate with React UI to display top 10 bids/asks in a table or chart, using Tailwind CSS for styling.
+    - Write `pytest` tests for order addition, cancellation, and display, covering edge cases.
+  - **Technical Specifications**:
+    - **Data Structure**: `SortedDict` for O(log n) insertions and lookups.
+    - **EIP-712 Typed Data**: Domain with contract address, chain ID; Order fields: marketId, outcome, price, quantity, signer, timestamp.
+    - **Cache**: Redis with JSON-serialized order book, accessed via `redis-py`.
+    - **Validation**: Raise `ValueError` for invalid prices, quantities, or EIP-712 signatures.
+    - **Logging**: Use `structlog` to log order additions/cancellations.
+    - **UI Output**: JSON with bids and asks arrays.
+  - **Dependencies**:
+    - Internal: None.
+    - External: Redis server, `eth_account` for EIP-712 signature verification.
+  - **Priority**: High
+  - **Effort Estimate**: 4 days
+
+- **User Story 1.2**: As a trader, I want to submit EIP-712 signed orders to the CLOB so that matches are executed efficiently and settled on-chain securely, with transaction details displayed in my wallet.
+  - **Acceptance Criteria**:
+    - Allow users to sign orders off-chain using MetaMask, displaying EIP-712 structured data in the wallet UI for review.
+    - Validate EIP-712 signed orders in CLOB with ECDSA signatures before adding to order book.
+    - Match limit orders when bid price ≥ ask price, prioritizing earliest orders (FIFO) at the same price.
+    - Support market orders by matching against best available limit orders (highest bid/lowest ask).
+    - Ensure O(log n) complexity for add, cancel, and match operations.
+    - Submit matched orders to Trading Contract for on-chain settlement within 5 seconds, including both signatures.
+    - Log matches with details: `market_id`, `buy_order_id`, `sell_order_id`, `price`, `quantity`, `timestamp`, `tx_hash`.
+    - Display match confirmation in UI (e.g., "Trade executed: 100 Yes shares at 0.5 USDC").
+  - **Tasks**:
+    - Implement `MatchingEngine` class with `match_signed_order(order: Dict, signature: bytes) -> List[Dict]` method.
+    - Define EIP-712 typed data structure for orders and verify signatures using `eth_account`.
+    - Use `SortedDict` for price levels, with FIFO queues (`collections.deque`) for same-price orders.
+    - Integrate with Trading Contract (`web3.py`) to submit matched orders via `executeTrade`.
+    - Create backend endpoint (`/submit_order`) using `aiohttp` to receive signed orders from UI.
+    - Update React UI to prompt users for EIP-712 signing via MetaMask (`ethers.js`).
+    - Write `pytest` tests for matching logic, covering partial fills, cancellations, market orders, and invalid signatures.
+    - Simulate order flows (100 orders/second) to test performance and scalability.
+  - **Technical Specifications**:
+    - **Order Format**: Dictionary with market_id, outcome, price, quantity, side, timestamp, signer.
+    - **EIP-712 Signature**: Sign `keccak256` hash of typed data; verify with `eth_account.Account.verify_message`.
+    - **Matching Logic**: Price-time priority; match bid ≥ ask, earliest timestamp first.
+    - **Complexity**: O(log n) for order insertion, O(1) for matching top orders.
+    - **Settlement**: Submit matched orders to `Trading.sol` via `web3.py` with `executeTrade` call.
+    - **Logging**: Log matches with `structlog` fields.
+    - **UI Output**: JSON with market_id, outcome, price, quantity, status.
+  - **Dependencies**:
+    - Internal: User Story 1.1 (OrderBook), User Story 2.2 (Trading Contract).
+    - External: MetaMask, Polygon RPC (Infura/Alchemy), `eth_account`.
+  - **Priority**: High
+  - **Effort Estimate**: 5 days
+
+### Epic 2: Smart Contract Infrastructure
+**Objective**: Deploy smart contracts for user wallet management, market creation, trading, and settlement, supporting the hybrid CLOB by validating and executing EIP-712 signed matched orders.
+
+- **User Story 2.1**: As a user, I want a proxy wallet created for me when I sign up so I can securely manage my funds and interact with prediction markets.
+  - **Acceptance Criteria**:
+    - Deploy a Proxy Wallet Factory contract that creates proxy wallets for new users.
+    - Each proxy wallet allows both the user (owner) and Fox Market to approve changes to prediction market addresses.
+    - Proxy wallets support USDC deposits, withdrawals, and trading approvals.
+    - Proxy wallets implement proper access control with owner and Fox Market admin roles.
+    - Allow users to view their proxy wallet address and balance in the UI.
+    - Emit events for wallet creation, deposits, withdrawals, and approvals.
+  - **Tasks**:
+    - Write `ProxyWalletFactory.sol` using OpenZeppelin's `Ownable` and `ReentrancyGuard`.
+    - Implement `createProxyWallet(address user) -> address` function with deterministic deployment.
+    - Add `ProxyWallet.sol` with owner and Fox Market approval capabilities.
+    - Deploy to Polygon Mumbai testnet using `web3.py` and `solcx` compilation.
+    - Integrate with existing contract deployment system in app.py.
+    - Create React UI component for proxy wallet management.
+    - Write `pytest` tests for wallet creation, deposits, withdrawals, and approvals.
+  - **Technical Specifications**:
+    - **Contract**: `ProxyWalletFactory.sol`, inheriting `Ownable` and `ReentrancyGuard` (OpenZeppelin).
+    - **Gas Limit**: Under 150,000 gas per proxy wallet creation.
+    - **Events**: `ProxyWalletCreated(address user, address wallet)`, `Deposit(address wallet, uint256 amount)`, `Withdrawal(address wallet, uint256 amount)`.
+    - **Access Control**: Owner (user) and Fox Market admin can approve market address changes.
+    - **Security**: Reentrancy protection, proper access control, and input validation.
+    - **UI**: React component showing wallet address, balance, and transaction history.
+    - **Deployment**: Use existing `solcx` compilation and `web3.py` deployment pattern from app.py.
+  - **Dependencies**:
+    - Internal: Existing contract deployment system in app.py.
+    - External: Polygon RPC, OpenZeppelin, `solcx` for compilation.
+  - **Priority**: High
+  - **Effort Estimate**: 3 days
+
+- **User Story 2.2**: As a market creator, I want to create prediction markets using a comprehensive Market Contract so users can trade on their outcomes securely.
+  - **Acceptance Criteria**:
+    - Deploy a comprehensive Market Contract that manages all prediction markets in a single contract.
+    - Issue ERC-1155 tokens for each market outcome (e.g., `YesToken`, `NoToken`), identified by `market_id` and `outcome_index`.
+    - Allow setting parameters: question (string, max 256 chars), resolution date (Unix timestamp, future date), oracle address (valid Polygon address).
+    - Validate parameters: non-empty question, resolution date > current timestamp, valid oracle address.
+    - Support multiple markets within the same contract, each with unique market IDs.
+    - Emit event `MarketCreated(marketId: uint, question: string, outcomes: address[], resolutionDate: uint, oracle: address)`.
+    - Allow UI to input market parameters and display creation status (e.g., "Market created: Will Bitcoin exceed $60,000?").
+  - **Tasks**:
+    - Write `Market.sol` using OpenZeppelin's `ERC1155` contract for comprehensive market management.
+    - Implement `createMarket(question: string, resolutionDate: uint, oracle: address) -> uint` function.
+    - Add market management functions: `getMarket(uint marketId)`, `getMarketCount()`, `resolveMarket(uint marketId)`.
+    - Deploy to Polygon Mumbai testnet using `web3.py` and `solcx` compilation (existing pattern in app.py).
+    - Integrate with existing contract deployment system in app.py (`/contracts/{contract_id}/deploy` endpoint).
+    - Create React UI component for market creation form (question, date, oracle).
+    - Write `pytest` tests for market creation, covering invalid inputs (e.g., empty question, past date).
+  - **Technical Specifications**:
+    - **Contract**: `Market.sol`, inheriting `ERC1155` and `Ownable` (OpenZeppelin).
+    - **Gas Limit**: Under 200,000 gas per market creation.
+    - **Event**: `MarketCreated(uint marketId, string question, address[] outcomes, uint resolutionDate, address oracle)`.
+    - **Storage**: `struct Market {string question, uint resolutionDate, address oracle, address[] outcomeTokens, bool resolved}`.
+    - **Validation**: Revert on invalid inputs (e.g., empty question, invalid oracle).
+    - **UI**: React form with inputs: question (text), resolution date (datetime), oracle (address).
+    - **Deployment**: Use existing `solcx` compilation and `web3.py` deployment pattern from app.py.
+  - **Dependencies**:
+    - Internal: Existing contract deployment system in app.py, User Story 2.1 (Proxy Wallet Factory).
+    - External: Polygon RPC, OpenZeppelin, `solcx` for compilation.
+  - **Priority**: High
+  - **Effort Estimate**: 4 days
+
+- **User Story 2.3**: As a trader, I want to execute trades through the Trading Contract so that matched orders are settled securely on-chain with proper token transfers.
+  - **Acceptance Criteria**:
+    - Deploy a Trading Contract that executes EIP-712 signed matched orders with USDC settlement.
+    - Validate EIP-712 signatures for both buy and sell orders before execution.
+    - Transfer ERC-1155 outcome tokens from seller to buyer.
+    - Transfer USDC from buyer's proxy wallet to seller's proxy wallet.
+    - Support partial fills and handle edge cases (insufficient funds, invalid signatures).
+    - Emit events for trade execution with details: `TradeExecuted(marketId, buyer, seller, outcome, quantity, price, timestamp)`.
+    - Integrate with the CLOB backend for order submission and settlement.
+  - **Tasks**:
+    - Write `Trading.sol` using OpenZeppelin's `ReentrancyGuard` and EIP-712 signature verification.
+    - Implement `executeTrade(Order buyOrder, Order sellOrder, bytes buySignature, bytes sellSignature)` function.
+    - Add EIP-712 domain separator and typed data structure for order validation.
+    - Integrate with Market Contract for ERC-1155 token transfers.
+    - Integrate with Proxy Wallet Factory for USDC transfers.
+    - Deploy to Polygon Mumbai testnet using `web3.py` and `solcx` compilation.
+    - Create backend integration for submitting matched orders from CLOB.
+    - Write `pytest` tests for trade execution, signature validation, and edge cases.
+  - **Technical Specifications**:
+    - **Contract**: `Trading.sol`, inheriting `ReentrancyGuard` and EIP-712 signature verification.
+    - **Gas Limit**: Under 100,000 gas per trade execution.
+    - **EIP-712**: Domain separator with contract address, chain ID, and version.
+    - **Order Structure**: `struct Order {uint marketId, uint outcome, uint price, uint quantity, address signer, uint timestamp}`.
+    - **Security**: Reentrancy protection, signature validation, and proper access control.
+    - **Integration**: Connect with Market Contract and Proxy Wallet Factory for token transfers.
+    - **Events**: `TradeExecuted(uint marketId, address buyer, address seller, uint outcome, uint quantity, uint price, uint timestamp)`.
+  - **Dependencies**:
+    - Internal: User Story 2.1 (Proxy Wallet Factory), User Story 2.2 (Market Contract).
+    - External: Polygon RPC, OpenZeppelin, `solcx` for compilation.
+  - **Priority**: High
+  - **Effort Estimate**: 4 days
+
+## Blockers
+
+### Current Blockers
+
+#### High Priority Blockers
+- [ ] **Smart Contract Compilation Issues** - Some contracts have compilation warnings that need to be resolved
+  - **Impact**: May affect contract deployment and functionality
+  - **Owner**: Development Team
+  - **Status**: In Progress
+  - **Created**: Current Sprint
+  - **Expected Resolution**: End of Sprint
+
+#### Medium Priority Blockers
+- [ ] **Docker Integration Testing** - Need to test the new Docker setup with contract deployment
+  - **Impact**: May affect development workflow
+  - **Owner**: DevOps Team
+  - **Status**: To Do
+  - **Created**: Current Sprint
+
+### Recently Resolved Blockers
+- [x] **Hardhat Migration** - Successfully migrated from Hardhat to web3.py + solcx
+  - **Resolution**: Implemented Python-based contract compilation and deployment
+  - **Resolved By**: Development Team
+  - **Resolution Date**: Current Sprint
+
+### Blocker Categories
+
+#### Technical Blockers
+- Smart contract compilation and deployment issues
+- Docker integration challenges
+- Performance optimization needs
+
+#### Process Blockers
+- Documentation updates needed
+- Testing strategy refinement
+
+#### External Blockers
+- Oracle integration complexity
+- Third-party service dependencies 
